@@ -1,0 +1,50 @@
+pool:
+  vmImage: ubuntu-16.04
+
+variables:
+  azureSubscription: 'TE Account - NoBun (6c1f4f3b-f65f-4667-8f9e-b9c48e09cd6b)'
+  azureContainerRegistry: nobun
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:9.6
+    ports: 
+    - 5432:5432
+    volumes:
+    - /var/run/postgresql:/var/run/postgresql
+
+services:
+  postgres: postgres
+
+steps:
+
+# If you change the DB name here, also change it in pycon/settings/travis.py
+- bash: |
+    sudo apt install -y postgresql-client
+    psql -c 'create database pycon2016;' -U postgres
+    psql -c 'create role vsts with SUPERUSER LOGIN;' -U postgres
+  displayName: Configure Postgres
+
+- task: UsePythonVersion@0
+  displayName: Use Python 2.7
+  inputs:
+    versionSpec: 2.7
+
+- bash: |
+    pip install -q tox==2.1.1
+  displayName: Install tox
+
+- bash: |
+    tox -- --settings=pycon.settings.travis
+  displayName: Run tests
+  env:
+    TOXENV: pycon
+
+- task: AzureCLI@1
+  displayName: Build image
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptLocation: inlineScript
+    inlineScript: |
+      az acr build -r $(azureContainerRegistry) -t $(azureContainerRegistry).azurecr.io/pycon .

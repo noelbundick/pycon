@@ -19,6 +19,9 @@ Build status for develop branch:
 .. image:: https://travis-ci.org/PyCon/pycon.svg?branch=develop
     :target: https://travis-ci.org/PyCon/pycon
 
+.. image:: https://dev.azure.com/noelbundick/noelbundick/_apis/build/status/pycon?branchName=azure
+    :target: https://dev.azure.com/noelbundick/noelbundick/_build/latest?definitionId=36&branchName=azure
+
 Running the PyCon site locally
 ------------------------------
 
